@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dm.mapper.WrongQuestionMapper">
+
+    <resultMap id="WrongQuestionMap" type="com.dm.entity.WrongQuestion">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="questionId" column="question_id"/>
+        <result property="userAnswer" column="user_answer"/>
+        <result property="wrongReason" column="wrong_reason"/>
+        <result property="mastered" column="mastered"/>
+        <result property="wrongTime" column="wrong_time"/>
+        <association property="question" javaType="com.dm.entity.Question">
+            <id property="id" column="q_id"/>
+            <result property="subject" column="subject"/>
+            <result property="type" column="type"/>
+            <result property="content" column="content"/>
+            <result property="optionA" column="option_a"/>
+            <result property="optionB" column="option_b"/>
+            <result property="optionC" column="option_c"/>
+            <result property="optionD" column="option_d"/>
+            <result property="answer" column="answer"/>
+            <result property="analysis" column="analysis"/>
+            <result property="knowledgePoint" column="knowledge_point"/>
+            <result property="difficulty" column="difficulty"/>
+        </association>
+    </resultMap>
+
+    <select id="selectList" resultMap="WrongQuestionMap">
+        SELECT w.*, q.id as q_id, q.subject, q.type, q.content, q.option_a, q.option_b,
+               q.option_c, q.option_d, q.answer, q.analysis, q.knowledge_point, q.difficulty
+        FROM wrong_question w
+        LEFT JOIN question q ON w.question_id = q.id
+        WHERE w.user_id = #{userId}
+        <if test="subject != null and subject != ''">
+            AND q.subject = #{subject}
+        </if>
+        <if test="mastered != null">
+            AND w.mastered = #{mastered}
+        </if>
+        ORDER BY w.wrong_time DESC
+    </select>
+
+    <select id="selectById" resultMap="WrongQuestionMap">
+        SELECT w.*, q.id as q_id, q.subject, q.type, q.content, q.option_a, q.option_b,
+               q.option_c, q.option_d, q.answer, q.analysis, q.knowledge_point, q.difficulty
+        FROM wrong_question w
+        LEFT JOIN question q ON w.question_id = q.id
+        WHERE w.id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.dm.entity.WrongQuestion" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO wrong_question (user_id, question_id, user_answer, wrong_reason, mastered)
+        VALUES (#{userId}, #{questionId}, #{userAnswer}, #{wrongReason}, #{mastered})
+    </insert>
+
+    <update id="update" parameterType="com.dm.entity.WrongQuestion">
+        UPDATE wrong_question
+        <set>
+            <if test="userAnswer != null">user_answer = #{userAnswer},</if>
+            <if test="wrongReason != null">wrong_reason = #{wrongReason},</if>
+            <if test="mastered != null">mastered = #{mastered},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM wrong_question WHERE id = #{id}
+    </delete>
+
+    <select id="countBySubject" resultType="com.dm.dto.WrongStatDTO">
+        SELECT q.subject as name, COUNT(*) as count
+        FROM wrong_question w
+        LEFT JOIN question q ON w.question_id = q.id
+        WHERE w.user_id = #{userId}
+        GROUP BY q.subject
+        ORDER BY count DESC
+    </select>
+
+    <select id="countByKnowledgePoint" resultType="com.dm.dto.WrongStatDTO">
+        SELECT q.knowledge_point as name, COUNT(*) as count
+        FROM wrong_question w
+        LEFT JOIN question q ON w.question_id = q.id
+        WHERE w.user_id = #{userId}
+        GROUP BY q.knowledge_point
+        ORDER BY count DESC
+    </select>
+
+    <select id="countByType" resultType="com.dm.dto.WrongStatDTO">
+        SELECT q.type as name, COUNT(*) as count
+        FROM wrong_question w
+        LEFT JOIN question q ON w.question_id = q.id
+        WHERE w.user_id = #{userId}
+        GROUP BY q.type
+        ORDER BY count DESC
+    </select>
+
+    <select id="countTotal" resultType="int">
+        SELECT COUNT(*) FROM wrong_question WHERE user_id = #{userId}
+    </select>
+
+    <select id="countMastered" resultType="int">
+        SELECT COUNT(*) FROM wrong_question WHERE user_id = #{userId} AND mastered = 1
+    </select>
+
+</mapper>

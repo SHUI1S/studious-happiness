@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dm.mapper.QuestionMapper">
+
+    <resultMap id="QuestionMap" type="com.dm.entity.Question">
+        <id property="id" column="id"/>
+        <result property="subject" column="subject"/>
+        <result property="type" column="type"/>
+        <result property="content" column="content"/>
+        <result property="optionA" column="option_a"/>
+        <result property="optionB" column="option_b"/>
+        <result property="optionC" column="option_c"/>
+        <result property="optionD" column="option_d"/>
+        <result property="answer" column="answer"/>
+        <result property="analysis" column="analysis"/>
+        <result property="knowledgePoint" column="knowledge_point"/>
+        <result property="difficulty" column="difficulty"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <select id="selectList" resultMap="QuestionMap">
+        SELECT * FROM question
+        <where>
+            <if test="subject != null and subject != ''">
+                AND subject = #{subject}
+            </if>
+            <if test="type != null and type != ''">
+                AND type = #{type}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND content LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectById" resultMap="QuestionMap">
+        SELECT * FROM question WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.dm.entity.Question" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO question (subject, type, content, option_a, option_b, option_c, option_d, answer, analysis, knowledge_point, difficulty)
+        VALUES (#{subject}, #{type}, #{content}, #{optionA}, #{optionB}, #{optionC}, #{optionD}, #{answer}, #{analysis}, #{knowledgePoint}, #{difficulty})
+    </insert>
+
+    <update id="update" parameterType="com.dm.entity.Question">
+        UPDATE question
+        <set>
+            <if test="subject != null">subject = #{subject},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="optionA != null">option_a = #{optionA},</if>
+            <if test="optionB != null">option_b = #{optionB},</if>
+            <if test="optionC != null">option_c = #{optionC},</if>
+            <if test="optionD != null">option_d = #{optionD},</if>
+            <if test="answer != null">answer = #{answer},</if>
+            <if test="analysis != null">analysis = #{analysis},</if>
+            <if test="knowledgePoint != null">knowledge_point = #{knowledgePoint},</if>
+            <if test="difficulty != null">difficulty = #{difficulty},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM question WHERE id = #{id}
+    </delete>
+
+    <select id="selectAllSubjects" resultType="string">
+        SELECT DISTINCT subject FROM question ORDER BY subject
+    </select>
+
+</mapper>
